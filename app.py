@@ -37,6 +37,10 @@ def main():
     ui_service = UIService(job_service)
     ai_service = AIService(db_client=db)
     
+    # Initialize additional session state variables
+    if 'job_acknowledged' not in st.session_state:
+        st.session_state.job_acknowledged = False
+    
     # Create three columns with custom widths
     tips_col, chat_col, jobs_col = st.columns([0.25, 0.45, 0.30])
     
@@ -125,7 +129,21 @@ def main():
                                key=f"interest_{idx}_{job['title']}", 
                                use_container_width=True):
                         st.session_state.selected_job = job['title']
-                        st.session_state.application_stage = None
+                        st.session_state.job_acknowledged = False
+                        st.session_state.application_stage = 'initial'
+                        
+                        # Add the job selection message
+                        st.session_state.messages.append({
+                            "role": "system",
+                            "content": f"You have selected the {job['title']} position."
+                        })
+                        
+                        # Immediately add the name request message
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": f"Great choice! I'll help you with your application for the {job['title']} position. To get started, could you please tell me your full name?"
+                        })
+                        
                         st.rerun()
 
 if __name__ == "__main__":

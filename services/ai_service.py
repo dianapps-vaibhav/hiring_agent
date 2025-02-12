@@ -16,9 +16,33 @@ class AIService:
         self.db_client = db_client
         self.llm = ChatOpenAI(
             model="gpt-3.5-turbo-0125",
-            temperature=0.7,  # Increased for more variation
-            return_messages=True
+            temperature=0.7
         )
+        
+        # Add job selection responses
+        self.job_selection_responses = [
+            "Great choice! I'd be happy to help you with your application for the {job_title} position. To get started, could you tell me about your relevant experience?",
+            "Excellent! The {job_title} role is an exciting opportunity. To help with your application, could you share your background in this field?",
+            "Perfect! I'll help you explore the {job_title} position. First, I'd love to hear about your experience and skills that align with this role.",
+            "Wonderful choice! Let's discuss your application for the {job_title} position. Could you start by telling me about your relevant work experience?",
+        ]
+        
+        # Add candidate information gathering prompts
+        self.info_gathering_prompts = {
+            'experience': [
+                "Could you elaborate on your experience with {skill}?",
+                "What specific projects have you worked on that relate to {skill}?",
+                "How many years of experience do you have with {skill}?"
+            ],
+            'education': [
+                "Could you tell me about your educational background?",
+                "What relevant certifications or degrees do you hold?",
+            ],
+            'skills': [
+                "What technical skills would you highlight for this role?",
+                "Could you describe your proficiency with the required technologies?",
+            ]
+        }
         
         # Initial greeting variations
         self.initial_greetings = [
@@ -64,9 +88,13 @@ class AIService:
    - Don't repeat exact phrases from previous messages
 
 3. After Role Selection:
-   - Acknowledge their choice enthusiastically
-   - Begin structured information gathering
-   - Maintain conversation flow naturally
+   - Guide the conversation to gather key information:
+     * Relevant experience
+     * Technical skills
+     * Educational background
+     * Current work situation
+   - Ask one question at a time
+   - Keep the conversation flowing naturally
 
 Current conversation:
 {history}
@@ -84,6 +112,13 @@ Assistant: """
 
     def generate_career_response(self, user_input, message_history, user_context):
         """Generate varied responses based on conversation state"""
+        
+        # Handle new job selection
+        if st.session_state.get('selected_job') and not st.session_state.get('job_acknowledged'):
+            st.session_state.job_acknowledged = True
+            return random.choice(self.job_selection_responses).format(
+                job_title=st.session_state.selected_job
+            )
         
         # If this is a new conversation or generic greeting
         if not message_history or len(message_history) <= 1:
