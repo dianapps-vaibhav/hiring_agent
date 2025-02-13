@@ -1,8 +1,14 @@
 import streamlit as st
+from dotenv import load_dotenv
+import os
+import uuid
 from database import Database
 from services.ai_service import AIService
 from services.job_service import JobService
 from services.ui_service import UIService
+
+# Load environment variables
+load_dotenv()
 
 def apply_custom_styles():
     st.markdown("""
@@ -63,12 +69,6 @@ def main():
         """)
         
         st.markdown("---")
-        st.markdown("""
-        **Need Help?**
-        - Type 'help' for assistance
-        - Ask about specific job requirements
-        - Request application tips
-        """)
     
     # Middle column - Chat Interface
     with chat_col:
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     
     st.set_page_config(
         page_title="Careers Assistant",
-        page_icon="👩‍💼",
+        page_icon="💼",
         layout="wide"
     )
     main()
