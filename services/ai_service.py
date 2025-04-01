@@ -1,3 +1,4 @@
+
 import uuid
 from openai import OpenAI
 import streamlit as st
@@ -18,10 +19,19 @@ class AIService:
 
         # Get available jobs from database
         self.available_jobs = self.db.get_all_jobs() if self.db else []
-
+        
+        # Configure DeepSeek client
+        self.client = OpenAI(
+            base_url="https://api.deepseek.com",  # DeepSeek API endpoint
+            api_key=st.secrets.get("DEEPSEEK_API_KEY", "")  # Use DeepSeek API key
+        )
+        
+        # Update LangChain to use DeepSeek
         self.llm = ChatOpenAI(
-            model="gpt-4-turbo-preview",
-            temperature=0.7
+            model="deepseek-chat",  # Use DeepSeek model
+            temperature=0.7,
+            openai_api_key=st.secrets.get("DEEPSEEK_API_KEY", ""),
+            openai_api_base="https://api.deepseek.com"
         )
         
         # Initialize or get session ID
